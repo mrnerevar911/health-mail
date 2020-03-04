@@ -7,26 +7,41 @@
 
 namespace app\commands;
 
+use GuzzleHttp\Client;
 use yii\console\Controller;
 use yii\console\ExitCode;
 
-/**
- * This command echoes the first argument that you have entered.
- *
- * This command is provided as an example for you to learn how to create console commands.
- *
- * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
- */
 class ParsingController extends Controller {
-    /**
-     * This command echoes what you have entered as the message.
-     * @param string $message the message to be echoed.
-     * @return int Exit code
-     */
+
+    public static $host = "https://health.mail.ru/";
+
+    private $url = "https://health.mail.ru/disease/";
+
     public function actionIndex() {
 
+        $client = new Client();
 
+        $res = $client->request('GET', $this->url);
+
+        $body = $res->getBody();
+
+        $document = \phpQuery::newDocumentHTML($body);
+
+        $disiease0Wrapper = $document->find("div.catalog__rubric");
+
+        foreach ($disiease0Wrapper as $elem) {
+
+            $pq = pq($elem);
+            $disease0 = $pq->find("a.catalog__rubric__title");
+            echo "disiase0 is " . $disease0->contents() . "\n";
+            $disiase1 = $pq->find("span.catalog__item__title");
+            foreach ($disiase1 as $el) {
+                $content = pq($el);
+                echo "disiase1 is " . $content->contents() . "\n";
+            }
+            die();
+
+        }
 
         return ExitCode::OK;
     }
